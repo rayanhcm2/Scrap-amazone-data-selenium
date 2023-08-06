@@ -6,12 +6,13 @@ Ce script Python récupère des informations sur les produits à partir de diver
 -Python 3.x
 bibliothèque selenium
 bibliothèque json
+bibliothèque sqlite3
 
 # Installation
 Assurez-vous que Python 3.x est installé sur votre système.
 Installez les bibliothèques requises à l'aide de pip :
 pip installer selenium
-pour la bibliothèque json elle existe déjà
+pour les bibliothèque json, sqlite3 elles existent déjà
 
 
 # Utilisation
