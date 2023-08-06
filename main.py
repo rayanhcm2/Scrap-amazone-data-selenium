@@ -1,4 +1,7 @@
+import sqlite3
+
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -8,6 +11,29 @@ with open("data.json", "w") as f:
     json.dump([], f)
 
 
+def delet_tb_from_db():
+    db = sqlite3.connect('data.db')
+    cr = db.cursor()
+    cr.execute("DROP TABLE IF EXISTS products")
+    db.commit()
+    db.close()
+
+
+def insert_into_database(title, price, image, url):
+    db = sqlite3.connect('data.db')
+    try:
+        print('Connected To Database Successfully')
+        cr = db.cursor()
+        cr.execute("CREATE TABLE if not exists products (title TEXT,price TEXT,image TEXT,url TEXT)")
+        cr.execute(f"insert into products(title,price,image,url) values('{title}','{price}','{image}','{url}')")
+        db.commit()
+    except sqlite3.Error as er:
+        print(f"Error Reading Data {er}")
+    finally:
+        db.close()
+        print('Connection to database is closed')
+
+
 def write_json(new_data, filename='data.json'):
     with open(filename, 'r+') as file:
         file_data = json.load(file)
@@ -15,8 +41,10 @@ def write_json(new_data, filename='data.json'):
         file.seek(0)
         json.dump(file_data, file, indent=4)
 
-
-driver = webdriver.Chrome()
+delet_tb_from_db()
+chrome_options = Options()
+chrome_options.add_argument('--headless')
+driver = webdriver.Chrome(options=chrome_options)
 driver.maximize_window()
 driver.get(
     'https://www.amazon.com/s?i=computers-intl-ship&bbn=16225007011&rh=n%3A16225007011%2Cp_36%3A1253503011&dc&fs=true'
@@ -67,6 +95,10 @@ while not isNextDisabled:
                 "Image": image_product,
                 "Link": link_product,
             }
+            insert_into_database(title_product,
+                                 price_product,
+                                 image_product,
+                                 link_product)
             write_json(my_product)
 
         next_btn = WebDriverWait(driver, 10).until(EC.presence_of_element_located(
